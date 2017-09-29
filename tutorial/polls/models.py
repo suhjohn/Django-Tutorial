@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from django.db import models
 
 
@@ -11,6 +12,9 @@ class Question(models.Model):
     def __str__(self):
         return f'설문조사 ({self.title})'
 
+    def is_recently(self):
+        return bool(self.published_date) and \
+               (datetime.now() - self.published_date) < timedelta(days=7)
 
 class Choice(models.Model):
     # ForeignKey 는 해당 클래스를 지정해주면 된다
