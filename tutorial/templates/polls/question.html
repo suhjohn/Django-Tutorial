@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="{% url 'vote' pk=question.pk %}" method="POST">
+    <table class="table table-stripped table-bordered">
+
+        <tr>{{ question.title }}</tr>
+        {% for choice in question.choice_set.all %}
+        <tr class="table-bordered">
+            <td>
+                <input type="radio" name="choice_pk" value={{ choice.pk }}>
+                {{ choice.title }} | {{ choice.votes }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% csrf_token%}
+    <button class="btn btn-primary">투표하기</button>
+</form>
+
+<a href="{% url 'graphed_results' pk=question.pk %}">
+    <button>통계보기</button>
+</a>
+{% endblock %}

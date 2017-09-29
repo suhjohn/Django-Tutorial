@@ -1,12 +1,13 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-
+from django.shortcuts import render, get_object_or_404, redirect
 
 # Create your views here.
 
 # change index:
 # which displays the latest 5 poll questions in the system, separated by commas, according to publication date:
-from polls.models import Question
+from django.utils.datastructures import MultiValueDictKeyError
+
+from .models import Question, Choice
 
 
 def index(request):
@@ -32,17 +33,52 @@ def index(request):
     :return:
     """
     questions = Question.objects.all()
-    context= {
+    context = {
         'questions': questions
     }
-
     return render(request, 'polls/index.html', context)
 
-def detail(request):
-    pass
+
+def question_detail(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    return render(request, 'polls/question.html', {'question': question})
+
 
 def results(request):
     pass
 
-def vote_action(request):
-    pass
+
+def vote(request, pk):
+    """
+    :param request:
+    :param choice_pk:
+    :return:
+    """
+    if request.method == 'POST':
+        try:
+            question = Question.objects.get(pk=pk)
+            choice_pk = request.POST.get('choice_pk')
+            choice = Choice.objects.get(pk=choice_pk)
+            choice.votes += 1
+            choice.save()
+            question = choice.question
+        except Question.DoesNotExist:
+            return redirect('index')
+        except MultiValueDictKeyError:
+            pass
+        except Choice.DoesNotExist:
+            pass
+        return redirect(question_detail, pk=question.pk)
+    else:
+        return HttpResponse("접근 권한이 없습니다", status=403)
+
+
+def graphed_results(request, pk):
+    """
+
+    :param request:
+    :param question_pk:
+    :return:
+    """
+
+    return HttpResponse(Question.objects.get(pk=pk))
